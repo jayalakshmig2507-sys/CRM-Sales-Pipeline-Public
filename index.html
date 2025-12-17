@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClientNova Labs CRM - Lead Capture</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        header img {
+            height: 60px;
+            margin-right: 15px;
+        }
+        header h1 {
+            color: #2a4d69;
+            font-size: 2em;
+        }
+        h2 {
+            color: #2a4d69;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #2a4d69;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #2a4d69;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <img src="https://via.placeholder.com/150x60.png?text=Logo" alt="ClientNova Labs Logo">
+        <h1>ClientNova Labs</h1>
+    </header>
+
+    <!-- Lead Capture Form -->
+    <h2>Lead Capture (Public or Internal)</h2>
+    <form id="leadForm">
+        <label for="leadName">Lead Name</label>
+        <input type="text" id="leadName" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" required>
+
+        <label for="company">Company</label>
+        <input type="text" id="company" required>
+
+        <label for="productInterest">Product Interest</label>
+        <select id="productInterest" required>
+            <option value="ClientNova DDI Suite">ClientNova DDI Suite</option>
+            <option value="Cloud DDI">Cloud DDI</option>
+            <option value="Threat Defense">Threat Defense</option>
+            <option value="Automation">Automation</option>
+            <option value="Network Insight">Network Insight</option>
+            <option value="X6 Appliance">X6 Appliance</option>
+            <option value="Insight Appliance">Insight Appliance</option>
+        </select>
+
+        <label for="leadSource">Lead Source</label>
+        <select id="leadSource" required>
+            <option value="Website">Website</option>
+            <option value="Referral">Referral</option>
+            <option value="Event">Event</option>
+            <option value="Cold Email">Cold Email</option>
+            <option value="Partner">Partner</option>
+        </select>
+
+        <label for="estimatedValue">Estimated Value (€)</label>
+        <input type="number" id="estimatedValue" required>
+
+        <label for="notes">Notes</label>
+        <textarea id="notes" rows="3"></textarea>
+
+        <label for="status">Status</label>
+        <select id="status" required>
+            <option value="New">New</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Qualified">Qualified</option>
+            <option value="Proposal">Proposal</option>
+            <option value="Won">Won</option>
+            <option value="Lost">Lost</option>
+        </select>
+
+        <label for="assignedTo">Assigned To</label>
+        <select id="assignedTo" required>
+            <option value="Alice Smith">Alice Smith</option>
+            <option value="Bob Johnson">Bob Johnson</option>
+            <option value="Charlie Lee">Charlie Lee</option>
+        </select>
+
+        <button type="submit">Add Lead</button>
+    </form>
+
+    <!-- Leads Table -->
+    <h2>Leads Table</h2>
+    <table id="leadsTable">
+        <thead>
+            <tr>
+                <th>Lead Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Company</th>
+                <th>Product Interest</th>
+                <th>Lead Source</th>
+                <th>Estimated Value (€)</th>
+                <th>Notes</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Leads from Firebase will appear here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgV5ML9wBhikQNni5cetnjYSwsgG1nIww",
+            authDomain: "crm-sales-pipeline---public.firebaseapp.com",
+            projectId: "crm-sales-pipeline---public",
+            storageBucket: "crm-sales-pipeline---public.firebasestorage.app",
+            messagingSenderId: "515554005522",
+            appId: "1:515554005522:web:db788425693fa9874e3ecb",
+            measurementId: "G-4S6Z3RZFQC"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const leadForm = document.getElementById('leadForm');
+        const leadsTableBody = document.getElementById('leadsTable').querySelector('tbody');
+
+        // Load existing leads from Firestore
+        db.collection("leads").onSnapshot(snapshot => {
+            leadsTableBody.innerHTML = "";
+            snapshot.forEach(doc => {
+                const lead = doc.data();
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${lead.leadName}</td>
+                    <td>${lead.email}</td>
+                    <td>${lead.phone}</td>
+                    <td>${lead.company}</td>
+                    <td>${lead.productInterest}</td>
+                    <td>${lead.leadSource}</td>
+                    <td>${lead.estimatedValue}</td>
+                    <td>${lead.notes}</td>
+                    <td>${lead.status}</td>
+                    <td>${lead.assignedTo}</td>
+                `;
+                leadsTableBody.appendChild(row);
+            });
+        });
+
+        // Add lead to Firebase
+        leadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const leadData = {
+                leadName: document.getElementById('leadName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                company: document.getElementById('company').value,
+                productInterest: document.getElementById('productInterest').value,
+                leadSource: document.getElementById('leadSource').value,
+                estimatedValue: document.getElementById('estimatedValue').value,
+                notes: document.getElementById('notes').value,
+                status: document.getElementById('status').value,
+                assignedTo: document.getElementById('assignedTo').value
+            };
+
+            db.collection("leads").add(leadData)
+                .then(() => {
+                    alert("Lead added successfully!");
+                    leadForm.reset();
+                })
+                .catch(error => {
+                    console.error("Error adding lead: ", error);
+                });
+        });
+    </script>
+
+</body>
+</html>
