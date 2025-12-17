@@ -1,193 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClientNova Labs CRM - Lead Capture</title>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-        header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        header img {
-            height: 60px;
-            margin-right: 15px;
-        }
-        header h1 {
-            color: #2a4d69;
-            font-size: 2em;
-        }
-        h2 {
-            color: #2a4d69;
-        }
-        form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        button {
-            margin-top: 15px;
-            padding: 10px 15px;
-            background-color: #2a4d69;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #2a4d69;
-            color: white;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClientNova Labs CRM Dashboard</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #e6f2e6;
+    }
+    header {
+        background: #2a4d69;
+        color: white;
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+    }
+    header img {
+        height: 60px;
+        margin-right: 15px;
+    }
+    header h1 {
+        font-size: 2rem;
+    }
+    nav {
+        background: #fff;
+        display: flex;
+        gap: 10px;
+        padding: 10px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    nav button {
+        border: none;
+        background: #2a4d69;
+        color: white;
+        padding: 10px 15px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    section {
+        padding: 20px;
+        display: none;
+    }
+    .active {
+        display: block;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        margin-top: 15px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background: #2a4d69;
+        color: white;
+    }
+    form input, form select, form textarea, form button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+    form button {
+        background: #2a4d69;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .product-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    }
+    .product-card h3 {
+        margin: 0;
+        color: #2a4d69;
+    }
+</style>
 </head>
 <body>
 
-    <!-- Header -->
-    <header>
-        <img src="https://via.placeholder.com/150x60.png?text=Logo" alt="ClientNova Labs Logo">
-        <h1>ClientNova Labs</h1>
-    </header>
+<header>
+    <img src="https://i.postimg.cc/CzJswC7w/59e68286.png" alt="ClientNova Labs Logo">
+    <h1>ClientNova Labs CRM</h1>
+</header>
 
-    <!-- Lead Capture Form -->
-    <h2>Lead Capture (Public or Internal)</h2>
+<nav>
+    <button onclick="showSection('openLeads')">Open Leads</button>
+    <button onclick="showSection('closedLeads')">Closed Leads</button>
+    <button onclick="showSection('productsOffers')">Products & Offers</button>
+</nav>
+
+<!-- ============================
+     SECTION: Open Leads
+============================ -->
+<section id="openLeads" class="active">
+
+    <h2>Capture Lead</h2>
     <form id="leadForm">
-        <label for="leadName">Lead Name</label>
-        <input type="text" id="leadName" required>
+        <input type="text" id="leadName" placeholder="Full Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="tel" id="phone" placeholder="Phone" required>
+        <input type="text" id="company" placeholder="Company" required>
 
-        <label for="email">Email</label>
-        <input type="email" id="email" required>
-
-        <label for="phone">Phone</label>
-        <input type="tel" id="phone" required>
-
-        <label for="company">Company</label>
-        <input type="text" id="company" required>
-
-        <label for="productInterest">Product Interest</label>
         <select id="productInterest" required>
-            <option value="ClientNova DDI Suite">ClientNova DDI Suite</option>
-            <option value="Cloud DDI">Cloud DDI</option>
-            <option value="Threat Defense">Threat Defense</option>
-            <option value="Automation">Automation</option>
-            <option value="Network Insight">Network Insight</option>
-            <option value="X6 Appliance">X6 Appliance</option>
-            <option value="Insight Appliance">Insight Appliance</option>
+            <option value="">Select Product</option>
+            <option>ClientNova DDI Suite</option>
+            <option>Cloud DDI</option>
+            <option>Threat Defense</option>
+            <option>Automation</option>
+            <option>Network Insight</option>
+            <option>X6 Appliance</option>
+            <option>Insight Appliance</option>
         </select>
 
-        <label for="leadSource">Lead Source</label>
         <select id="leadSource" required>
-            <option value="Website">Website</option>
-            <option value="Referral">Referral</option>
-            <option value="Event">Event</option>
-            <option value="Cold Email">Cold Email</option>
-            <option value="Partner">Partner</option>
+            <option value="">Lead Source</option>
+            <option>Website</option>
+            <option>Referral</option>
+            <option>Event</option>
+            <option>Cold Email</option>
+            <option>Partner</option>
         </select>
 
-        <label for="estimatedValue">Estimated Value (€)</label>
-        <input type="number" id="estimatedValue" required>
+        <input type="number" id="estimatedValue" placeholder="Estimated Value (€)" required>
+        <textarea id="notes" placeholder="Notes"></textarea>
 
-        <label for="notes">Notes</label>
-        <textarea id="notes" rows="3"></textarea>
-
-        <label for="status">Status</label>
         <select id="status" required>
             <option value="New">New</option>
             <option value="Contacted">Contacted</option>
             <option value="Qualified">Qualified</option>
             <option value="Proposal">Proposal</option>
-            <option value="Won">Won</option>
-            <option value="Lost">Lost</option>
         </select>
 
-        <label for="assignedTo">Assigned To</label>
         <select id="assignedTo" required>
-            <option value="Alice Smith">Alice Smith</option>
-            <option value="Bob Johnson">Bob Johnson</option>
-            <option value="Charlie Lee">Charlie Lee</option>
+            <option>Alice Smith</option>
+            <option>Bob Johnson</option>
+            <option>Charlie Lee</option>
         </select>
 
         <button type="submit">Add Lead</button>
     </form>
 
-    <!-- Leads Table -->
-    <h2>Leads Table</h2>
-    <table id="leadsTable">
+    <h2>Open Leads Table</h2>
+    <table id="openLeadsTable">
         <thead>
             <tr>
-                <th>Lead Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Company</th>
-                <th>Product Interest</th>
-                <th>Lead Source</th>
-                <th>Estimated Value (€)</th>
-                <th>Notes</th>
-                <th>Status</th>
-                <th>Assigned To</th>
+                <th>Name</th><th>Email</th><th>Phone</th><th>Company</th>
+                <th>Product</th><th>Lead Source</th><th>Value (€)</th><th>Status</th><th>Assigned</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Leads from Firebase will appear here -->
-        </tbody>
+        <tbody></tbody>
     </table>
 
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAgV5ML9wBhikQNni5cetnjYSwsgG1nIww",
-            authDomain: "crm-sales-pipeline---public.firebaseapp.com",
-            projectId: "crm-sales-pipeline---public",
-            storageBucket: "crm-sales-pipeline---public.firebasestorage.app",
-            messagingSenderId: "515554005522",
-            appId: "1:515554005522:web:db788425693fa9874e3ecb",
-            measurementId: "G-4S6Z3RZFQC"
-        };
+</section>
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+<!-- ============================
+     SECTION: Closed Leads
+============================ -->
+<section id="closedLeads">
+    <h2>Closed Leads</h2>
+    <table id="closedLeadsTable">
+        <thead>
+            <tr>
+                <th>Name</th><th>Email</th><th>Company</th><th>Product</th>
+                <th>Status</th><th>Assigned</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</section>
 
-        const leadForm = document.getElementById('leadForm');
-        const leadsTableBody = document.getElementById('leadsTable').querySelector('tbody');
+<!-- ============================
+     SECTION: Products & Offers
+============================ -->
+<section id="productsOffers">
+    <h2>Products & Offers</h2>
 
-        // Load existing leads from Firestore
-        db.collection("leads").onSnapshot(snapshot => {
-            leadsTableBody.innerHTML = "";
-            snapshot.forEach(doc => {
-                const lead = doc.data();
-                const row = document.createElement('tr');
+    <div class="products">
+        <div class="product-card">
+            <h3>ClientNova DDI Suite</h3>
+            <p>Centralized cloud-managed DDI for hybrid networks.</p>
+        </div>
+        <div class="product-card">
+            <h3>Cloud DDI</h3>
+            <p>SaaS-based zero-touch DDI for branches & clouds.</p>
+        </div>
+        <div class="product-card">
+            <h3>Threat Defense</h3>
+            <p>DNS-layer security to block malicious infrastructure.</p>
+        </div>
+        <div class="product-card">
+            <h3>Network Insight</h3>
+            <p>Discovery & unified asset visibility.</p>
+        </div>
+        <div class="product-card">
+            <h3>Automation</h3>
+            <p>Provisioning automation across environments.</p>
+        </div>
+        <div class="product-card">
+            <h3>Appliances</h3>
+            <p>High-performance DDI & Insight appliances.</p>
+        </div>
+    </div>
+
+</section>
+
+<script>
+    // Navigation
+    function showSection(id) {
+        document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+    }
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgV5ML9wBhikQNni5cetnjYSwsgG1nIww",
+      authDomain: "crm-sales-pipeline---public.firebaseapp.com",
+      projectId: "crm-sales-pipeline---public",
+      storageBucket: "crm-sales-pipeline---public.firebasestorage.app",
+      messagingSenderId: "515554005522",
+      appId: "1:515554005522:web:db788425693fa9874e3ecb",
+      measurementId: "G-4S6Z3RZFQC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const openLeadsTable = document.getElementById("openLeadsTable").querySelector("tbody");
+    const closedLeadsTable = document.getElementById("closedLeadsTable").querySelector("tbody");
+
+    // Load Live Leads
+    db.collection("leads").onSnapshot(snapshot => {
+        openLeadsTable.innerHTML = "";
+        closedLeadsTable.innerHTML = "";
+
+        snapshot.forEach(doc => {
+            const lead = doc.data();
+            const row = document.createElement("tr");
+
+            if (lead.status === "Won" || lead.status === "Lost") {
+                row.innerHTML = `
+                    <td>${lead.leadName}</td>
+                    <td>${lead.email}</td>
+                    <td>${lead.company}</td>
+                    <td>${lead.productInterest}</td>
+                    <td>${lead.status}</td>
+                    <td>${lead.assignedTo}</td>
+                `;
+                closedLeadsTable.appendChild(row);
+            } else {
                 row.innerHTML = `
                     <td>${lead.leadName}</td>
                     <td>${lead.email}</td>
@@ -196,41 +278,34 @@
                     <td>${lead.productInterest}</td>
                     <td>${lead.leadSource}</td>
                     <td>${lead.estimatedValue}</td>
-                    <td>${lead.notes}</td>
                     <td>${lead.status}</td>
                     <td>${lead.assignedTo}</td>
                 `;
-                leadsTableBody.appendChild(row);
-            });
+                openLeadsTable.appendChild(row);
+            }
         });
+    });
 
-        // Add lead to Firebase
-        leadForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const leadData = {
-                leadName: document.getElementById('leadName').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                company: document.getElementById('company').value,
-                productInterest: document.getElementById('productInterest').value,
-                leadSource: document.getElementById('leadSource').value,
-                estimatedValue: document.getElementById('estimatedValue').value,
-                notes: document.getElementById('notes').value,
-                status: document.getElementById('status').value,
-                assignedTo: document.getElementById('assignedTo').value
-            };
-
-            db.collection("leads").add(leadData)
-                .then(() => {
-                    alert("Lead added successfully!");
-                    leadForm.reset();
-                })
-                .catch(error => {
-                    console.error("Error adding lead: ", error);
-                });
-        });
-    </script>
+    // Add Lead
+    document.getElementById("leadForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const leadData = {
+            leadName: document.getElementById("leadName").value,
+            email: document.getElementById("email").value,
+            phone: document.getElementById("phone").value,
+            company: document.getElementById("company").value,
+            productInterest: document.getElementById("productInterest").value,
+            leadSource: document.getElementById("leadSource").value,
+            estimatedValue: document.getElementById("estimatedValue").value,
+            notes: document.getElementById("notes").value,
+            status: document.getElementById("status").value,
+            assignedTo: document.getElementById("assignedTo").value
+        };
+        db.collection("leads").add(leadData);
+        e.target.reset();
+        alert("Lead Added!");
+    });
+</script>
 
 </body>
 </html>
